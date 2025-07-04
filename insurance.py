@@ -32,6 +32,21 @@ st.markdown("""
         color: white;
     }
 
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(
+            to bottom,
+            #f9fafd,
+            #eaeff8,
+            #cdd8ee,
+            #92abdb,
+            #839fd6,
+            #7494d1,
+            #6688cc,
+            #577dc7,
+            #4872c2
+        ) !important;
+    }
+
     .main * {
         color: white !important;
     }
@@ -68,7 +83,7 @@ st.markdown("""
     }
 
     .about-company {
-        font-size: 18px;
+        font-size: 20px;
         color: #ccc;
         padding: 10px;
         text-align: center;
@@ -87,13 +102,27 @@ st.markdown("""
         color: black !important;
     }
             
+
+    section[data-testid="stSidebar"] .stRadio {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Center-align the labels inside each radio option */
+    section[data-testid="stSidebar"] .stRadio label {
+        text-align: center;
+        width: 100%;
+    }
+            
     </style>
 """, unsafe_allow_html=True)
 
 # =============== LOAD & CLEAN DATA ==================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("insurance_fraud_synthetic.csv")
+    df = pd.read_csv(r"insurance_fraud_synthetic.csv")
 
     drop_cols = [col for col in df.columns if col.lower() in ['policy_number', 'incident_id', 'customer_id', 'claim_id']]
     df.drop(columns=drop_cols, inplace=True, errors='ignore')
@@ -146,7 +175,7 @@ model, label_encoders, X, y, metrics, df_encoded = prepare_model(df)
 # =============== SIDEBAR ==================
 with st.sidebar:
     st.image("https://booleandata.com/wp-content/uploads/2022/09/Boolean-logo_Boolean-logo-USA-1-980x316.png", use_column_width=True)
-    section = st.radio("📊 Navigation", ["EDA", "Visualization", "ML Prediction"])
+    section = st.radio("", ["EDA", "Visualization", "ML Prediction"])
     st.markdown("---")
     st.markdown("""
         <div class='about-company'>
