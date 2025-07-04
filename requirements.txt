@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 streamlit
 pandas
 numpy
@@ -7,14 +6,5 @@ seaborn
 scikit-learn==1.2.2
 imbalanced-learn==0.10.1
 joblib
-=======
-streamlit
-pandas
-numpy
-matplotlib
-seaborn
-scikit-learn==1.2.2
-joblib
 xgboost
 imblearn
->>>>>>> 269f8e4 (Fix install issue: Set Python 3.10 and compatible packages)
