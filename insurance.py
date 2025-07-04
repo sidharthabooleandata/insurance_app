@@ -83,7 +83,7 @@ st.markdown("""
     }
 
     .about-company {
-        font-size: 20px;
+        font-size: 18px;
         color: #ccc;
         padding: 10px;
         text-align: center;
