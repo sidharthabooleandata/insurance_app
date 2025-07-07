@@ -129,7 +129,7 @@ st.markdown("""
 # =============== LOAD & CLEAN DATA ==================
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"C:\Users\sidhartha-BD\Desktop\insurance\insurance_fraud_synthetic.csv")
+    df = pd.read_csv(r"insurance_fraud_synthetic.csv")
 
     drop_cols = [col for col in df.columns if col.lower() in ['policy_number', 'incident_id', 'customer_id', 'claim_id']]
     df.drop(columns=drop_cols, inplace=True, errors='ignore')
