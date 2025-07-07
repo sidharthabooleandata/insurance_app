@@ -81,7 +81,7 @@ st.markdown("""
 
     /* ✅ About Us Text - White */
     .about-company {
-        font-size: 15px;
+        font-size: 18px;
         color: #dce2f3 !important;
         padding: 10px;
         text-align: center;
@@ -129,7 +129,7 @@ st.markdown("""
 # =============== LOAD & CLEAN DATA ==================
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"insurance_fraud_synthetic.csv")
+    df = pd.read_csv(r"C:\Users\sidhartha-BD\Desktop\insurance\insurance_fraud_synthetic.csv")
 
     drop_cols = [col for col in df.columns if col.lower() in ['policy_number', 'incident_id', 'customer_id', 'claim_id']]
     df.drop(columns=drop_cols, inplace=True, errors='ignore')
@@ -201,15 +201,86 @@ with st.sidebar:
 
 # =============== VISUALIZATION ==================
 if section == "Visualization":
-    st.title("Data Visualizations")
-    st.subheader("Embedded Power BI Dashboard")
-    
-    # Replace the URL below with your actual Power BI public link
-    powerbi_url = "https://app.powerbi.com/view?r=YOUR_POWERBI_DASHBOARD_LINK"
-    st.markdown(f"""
-        <iframe title="PowerBI Report" width="100%" height="700" 
-        src="{powerbi_url}" frameborder="0" allowFullScreen="true"></iframe>
-    """, unsafe_allow_html=True)
+    import streamlit as st
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+
+    # Load Data
+    @st.cache_data
+    def load_data():
+        df = pd.read_csv(r"C:\Users\sidhartha-BD\Desktop\insurance\insurance_fraud_synthetic.csv")
+        df['fraud_reported'] = df['fraud_reported'].map(lambda x: 1 if str(x).strip().upper() in ['Y', 'YES', '1'] else 0)
+        return df
+
+    df = load_data()
+
+    # Dashboard Title
+    st.title("📊 Insurance Fraud Detection Dashboard")
+    st.markdown("**Visualizing patterns in insurance claims to detect potential frauds.**")
+
+    # Layout: 2 columns
+    col1, col2 = st.columns(2)
+
+    # ================== Chart 1: Fraud Count ===================
+    with col1:
+        st.subheader("🔍 Fraud vs Non-Fraud Count")
+        fig, ax = plt.subplots()
+        colors = ['#1E3A8A', '#3B82F6']
+        sns.countplot(x='fraud_reported', data=df, palette=colors, ax=ax)
+        ax.set_xticklabels(['Non-Fraud', 'Fraud'])
+        ax.set_ylabel("Count")
+        st.pyplot(fig)
+
+    # ================== Chart 2: Claim Amount by Fraud ===================
+    with col2:
+        st.subheader("💰 Total Claim Amount Distribution")
+        fig, ax = plt.subplots()
+        sns.boxplot(x='fraud_reported', y='total_claim_amount', data=df, palette=colors, ax=ax)
+        ax.set_xticklabels(['Non-Fraud', 'Fraud'])
+        ax.set_ylabel("Claim Amount")
+        st.pyplot(fig)
+
+    # ================== Chart 3: Education vs Fraud ===================
+    st.subheader("🎓 Education Level vs Fraud Rate")
+    fraud_by_edu = df.groupby('insured_education_level')['fraud_reported'].mean().sort_values()
+    fig, ax = plt.subplots(figsize=(8, 3))
+    fraud_by_edu.plot(kind='barh', color='#1D4ED8', ax=ax)
+    ax.set_xlabel("Fraud Rate")
+    st.pyplot(fig)
+
+    # ================== Chart 4: Correlation Heatmap ===================
+    st.subheader("🚗 Top 10 Categories by Avg Total Claim Amount")
+
+    # Use a valid categorical column other than 'auto_make'
+    categorical_cols = df.select_dtypes(include='object').columns.tolist()
+    fallback_col = None
+    for col in categorical_cols:
+        if df[col].nunique() < 50 and col != 'fraud_reported':
+            fallback_col = col
+            break
+
+    if fallback_col:
+        top_vals = df.groupby(fallback_col)['total_claim_amount'].mean().sort_values(ascending=False).head(10)
+        fig, ax = plt.subplots(figsize=(8, 3))
+        top_vals.plot(kind='bar', color='#3B82F6', ax=ax)
+        ax.set_ylabel("Avg Claim Amount")
+        ax.set_xlabel(fallback_col.replace("_", " ").title())
+        st.pyplot(fig)
+    else:
+        st.warning("No suitable categorical column found for top claims chart.")
+
+    # ================== Chart 6: Gender vs Fraud (Fallback Safe) ===================
+    st.subheader("👤 Demographic-wise Fraud Reported")
+
+    if 'insured_sex' in df.columns:
+        fig, ax = plt.subplots()
+        sns.countplot(data=df, x='insured_sex', hue='fraud_reported', palette=colors, ax=ax)
+        ax.legend(['Non-Fraud', 'Fraud'])
+        st.pyplot(fig)
+    else:
+        st.warning("`insured_sex` column not found in dataset.")
 
 # =============== PREDICTION ==================
 elif section == "ML Prediction":
