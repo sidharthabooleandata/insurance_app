@@ -210,7 +210,7 @@ if section == "Visualization":
     # Load Data
     @st.cache_data
     def load_data():
-        df = pd.read_csv(r"C:\Users\sidhartha-BD\Desktop\insurance\insurance_fraud_synthetic.csv")
+        df = pd.read_csv(r"insurance_fraud_synthetic.csv")
         df['fraud_reported'] = df['fraud_reported'].map(lambda x: 1 if str(x).strip().upper() in ['Y', 'YES', '1'] else 0)
         return df
 
