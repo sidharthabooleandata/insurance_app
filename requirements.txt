@@ -7,4 +7,4 @@ seaborn==0.12.2
 imbalanced-learn==0.10.1
 joblib
 xgboost
-
+ploty
