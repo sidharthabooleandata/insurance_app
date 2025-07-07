@@ -81,7 +81,7 @@ st.markdown("""
 
     /* ✅ About Us Text - White */
     .about-company {
-        font-size: 18px;
+        font-size: 15px;
         color: #dce2f3 !important;
         padding: 10px;
         text-align: center;
