@@ -14,49 +14,45 @@ from imblearn.over_sampling import SMOTE
 st.set_page_config(page_title="Insurance Fraud Detection", layout="wide")
 
 st.markdown("""
+    
     <style>
     html, body, .main {
-        background: linear-gradient(
-            to bottom,
-            #030509,
-            #080c18,
-            #0d1326,
-            #121a35,
-            #182243,
-            #1d2952,
-            #223060,
-            #27376f,
-            #27376f
-        ) !important;
-        background-attachment: fixed;
-        color: white;
+        background-color: #EBEEF8 !important;
+        background: #EBEEF8 !important;
+        color: black;
     }
 
+    /* Sidebar Gradient */
     section[data-testid="stSidebar"] {
         background: linear-gradient(
             to bottom,
             #f9fafd,
-            #eaeff8,
-            #cdd8ee,
-            #92abdb,
-            #839fd6,
-            #7494d1,
-            #6688cc,
-            #577dc7,
-            #4872c2
+            #e6eaf0,
+            #c5cbd6,
+            #9fa6b3,
+            #7b8190,
+            #5c6374,
+            #3f4556,
+            #232739,
+            #161925,
+            #0c0e14,
+            #030509
         ) !important;
     }
 
-    .main * {
-        color: white !important;
+    /* Main Content Headers */
+    .main h1, .main h2, .main h3, .main p, .main label {
+        color: #1c2953;
     }
 
+    /* Buttons */
     .stButton>button {
         background-color: #405dbc;
         color: white;
         border-radius: 8px;
     }
 
+    /* Inputs */
     div[data-baseweb="select"] > div,
     .stNumberInput input,
     input[type="text"],
@@ -72,9 +68,10 @@ st.markdown("""
     }
 
     label {
-        color: white !important;
+        color: black !important;
     }
 
+    /* Sidebar Bottom Section */
     .sidebar-bottom {
         margin-top: auto;
         padding-top: 20px;
@@ -82,40 +79,50 @@ st.markdown("""
         text-align: center;
     }
 
+    /* ✅ About Us Text - White */
     .about-company {
         font-size: 18px;
-        color: #ccc;
+        color: #dce2f3 !important;
         padding: 10px;
         text-align: center;
     }
 
-    .sidebar-bottom a {
-        margin: 0 10px;
+    /* ✅ Social Media Icons Highlighted */
+    .sidebar-bottom a img {
+        filter: drop-shadow(0 0 2px white) brightness(1.2);
+        transition: transform 0.2s ease;
+        margin: 0 8px;
     }
-            
-    /* Force sidebar text to black */
-    section[data-testid="stSidebar"] * {
-        color: black !important;
+    .sidebar-bottom a img:hover {
+        transform: scale(1.1);
     }
+
 
     section[data-testid="stSidebar"] .stRadio > label {
         color: black !important;
     }
-            
-
     section[data-testid="stSidebar"] .stRadio {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
     }
-
-    /* Center-align the labels inside each radio option */
     section[data-testid="stSidebar"] .stRadio label {
         text-align: center;
         width: 100%;
     }
-            
+
+    /* Prediction Results */
+    .fraud-text {
+        color: darkred !important;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .nonfraud-text {
+        color: darkgreen !important;
+        font-size: 18px;
+        font-weight: bold;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -175,12 +182,13 @@ model, label_encoders, X, y, metrics, df_encoded = prepare_model(df)
 # =============== SIDEBAR ==================
 with st.sidebar:
     st.image("https://booleandata.com/wp-content/uploads/2022/09/Boolean-logo_Boolean-logo-USA-1-980x316.png", use_column_width=True)
-    section = st.radio("", ["EDA", "Visualization", "ML Prediction"])
+    section = st.radio("", [ "Visualization", "ML Prediction"])
     st.markdown("---")
     st.markdown("""
         <div class='about-company'>
-        <h5>🚀 About Us</h5>
-        We are a data-driven company revolutionizing the insurance industry through predictive analytics. Our models help detect fraudulent claims with high accuracy and transparency.
+        <h1>🚀 About Us</h1>
+        We are a data-driven company revolutionizing the insurance industry through predictive analytics. Our models help detect fraudulent claims with high accuracy and transparency.These solutions lower costs and enhance output, designed to transform smoothly as your enterprise.
+        
         </div>
         <div class="sidebar-bottom">
           <a href="https://booleandata.ai/" target="_blank">🌐</a>
@@ -190,99 +198,19 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-# =============== EDA ==================
-if section == "EDA":
-    st.title("📋 Exploratory Data Analysis")
-    st.dataframe(df.head())
-    st.subheader("Summary Statistics")
-    st.dataframe(df.describe())
-    st.subheader("Missing Values")
-    st.write(df.isnull().sum())
-    st.subheader("Fraud Class Distribution")
-
-    with st.container():
-        fig, ax = plt.subplots()
-
-        # Set teal-green color palette: [Non-Fraud, Fraud]
-        teal_green_palette = ['#66CDAA', '#008080']
-
-        sns.countplot(data=df, x="fraud_reported", palette=teal_green_palette, ax=ax)
-
-        # Optional styling
-        ax.set_title("Fraud vs Non-Fraud Count", fontsize=14, color='black')
-        ax.set_xlabel("Fraud Reported", color='black')
-        ax.set_ylabel("Count", color='black')
-        ax.tick_params(colors='black')
-
-    fig.patch.set_facecolor('#f0f0f0')
-    st.markdown("<div overflow:hidden; background-color:#f0f0f0; padding:10px;'>", unsafe_allow_html=True)
-    st.pyplot(fig)
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.subheader("📈 Model Performance (Balanced Data)")
-    st.metric("Accuracy", f"{metrics['accuracy']:.2%}")
-    st.metric("Precision", f"{metrics['precision']:.2%}")
-    st.metric("Recall", f"{metrics['recall']:.2%}")
-    st.metric("F1 Score", f"{metrics['f1']:.2%}")
 
 # =============== VISUALIZATION ==================
-elif section == "Visualization":
-    st.title("📊 Data Visualizations")
+if section == "Visualization":
+    st.title("Data Visualizations")
+    st.subheader("Embedded Power BI Dashboard")
+    
+    # Replace the URL below with your actual Power BI public link
+    powerbi_url = "https://app.powerbi.com/view?r=YOUR_POWERBI_DASHBOARD_LINK"
+    st.markdown(f"""
+        <iframe title="PowerBI Report" width="100%" height="700" 
+        src="{powerbi_url}" frameborder="0" allowFullScreen="true"></iframe>
+    """, unsafe_allow_html=True)
 
-    st.subheader("Fraud vs Non-Fraud Distribution (Pie Chart)")
-    with st.container():
-        fig2, ax2 = plt.subplots(figsize=(8, 2))
-
-        fraud_counts = df['fraud_reported'].value_counts()
-        labels = ['Non-Fraud', 'Fraud']
-        sizes = [fraud_counts[0], fraud_counts[1]]
-        colors = ['#66CDAA', '#008080']  # Non-Fraud: light teal, Fraud: teal
-
-        fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors, startangle=140, textprops={'color': "black"})
-        ax.axis('equal')  # Equal aspect ratio ensures pie is drawn as a circle
-
-        fig.patch.set_facecolor('#f0f0f0')
-        st.markdown("<div overflow:hidden; background-color:#f0f0f0; padding:10px;'>", unsafe_allow_html=True)
-        st.pyplot(fig)
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-    import matplotlib.colors as mcolors
-
-    st.subheader("Correlation Heatmap")
-    with st.container():
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-
-        # Create a custom teal-white colormap
-        teal_white = mcolors.LinearSegmentedColormap.from_list("teal_white", ["#008080", "#ffffff"])
-
-        sns.heatmap(df_encoded.corr(), annot=True, cmap=teal_white, fmt=".2f", ax=ax2)
-
-        fig2.patch.set_facecolor('#f0f0f0')
-        st.markdown("<div overflow:hidden; background-color:#f0f0f0; padding:10px;'>", unsafe_allow_html=True)
-        st.pyplot(fig2)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    st.subheader("Feature Importances (Line Chart)")
-    with st.container():
-        fig2, ax2 = plt.subplots(figsize=(8, 2))
-        # Get top 10 features
-        top_features = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False).head(10)
-
-        # Create the plot
-        fig, ax = plt.subplots()
-        ax.plot(top_features.index, top_features.values, marker='o', linestyle='-', color='#008080', linewidth=2, markersize=8)
-
-        # Style the chart
-        ax.set_title("Top 10 Important Features", fontsize=14, color='black')
-        ax.set_ylabel("Importance", fontsize=12, color='black')
-        ax.set_xticklabels(top_features.index, rotation=45, ha='right', color='black')
-        ax.tick_params(axis='y', colors='black')
-        ax.grid(True, linestyle='--', alpha=0.4)
-
-        fig.patch.set_facecolor('#f0f0f0')
-        st.markdown("<div overflow:hidden; background-color:#f0f0f0; padding:10px;'>", unsafe_allow_html=True)
-        st.pyplot(fig)
-        st.markdown("</div>", unsafe_allow_html=True)
 # =============== PREDICTION ==================
 elif section == "ML Prediction":
     st.title("🔍 Insurance Fraud Detection")
@@ -348,14 +276,18 @@ elif section == "ML Prediction":
         if prediction == 1:
             st.markdown(f"""
                 <div style="background-color:#FFCDD2; padding: 20px; border-radius: 10px; border: 2px solid red;">
-                    <h3 style="color:red;">⚠️ FRAUDULENT CLAIM DETECTED</h3>
-                    <p style="font-size:18px;">🔍 Fraud Probability: <strong>{probability:.2%}</strong></p>
+                    <h3 class="fraud-text">⚠️ FRAUDULENT CLAIM DETECTED</h3>
+                    <p style="all: unset; color: black; font-size: 18px; font-weight: bold;">
+                        🔍 Fraud Probability: <strong style="all: unset; color: black;">{probability:.2%}</strong>
+                    </p>
                 </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
                 <div style="background-color:#C8E6C9; padding: 20px; border-radius: 10px; border: 2px solid green;">
-                    <h3 style="color:green;">✅ CLAIM IS NON-FRAUDULENT</h3>
-                    <p style="font-size:18px;">🔍 Confidence: <strong>{(1 - probability):.2%}</strong></p>
+                    <h3 class="nonfraud-text">✅ CLAIM IS NON-FRAUDULENT</h3>
+                    <p style="all: unset; color: black; font-size: 18px; font-weight: bold;">
+                        🔍 Confidence: <strong style="all: unset; color: black;">{(1 - probability):.2%}</strong>
+                    </p>
                 </div>
             """, unsafe_allow_html=True)
