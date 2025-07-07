@@ -129,7 +129,7 @@ st.markdown("""
 # =============== LOAD & CLEAN DATA ==================
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"insurance_fraud_synthetic.csv")
+    df = pd.read_csv(r"C:\Users\sidhartha-BD\Desktop\insurance\insurance_fraud_synthetic.csv")
 
     drop_cols = [col for col in df.columns if col.lower() in ['policy_number', 'incident_id', 'customer_id', 'claim_id']]
     df.drop(columns=drop_cols, inplace=True, errors='ignore')
@@ -203,84 +203,71 @@ with st.sidebar:
 if section == "Visualization":
     import streamlit as st
     import pandas as pd
-    import matplotlib.pyplot as plt
+    import plotly.express as px
+    import plotly.graph_objects as go
     import seaborn as sns
+    import matplotlib.pyplot as plt
 
-
-    # Load Data
+    # Load and preprocess data
     @st.cache_data
     def load_data():
-        df = pd.read_csv(r"insurance_fraud_synthetic.csv")
-        df['fraud_reported'] = df['fraud_reported'].map(lambda x: 1 if str(x).strip().upper() in ['Y', 'YES', '1'] else 0)
+        df = pd.read_csv("insurance_fraud_synthetic.csv")
+        df['fraud_reported'] = df['fraud_reported'].apply(lambda x: 1 if str(x).strip().upper() in ['Y', 'YES', '1'] else 0)
+        df['property_damage'] = df['property_damage'].fillna("Unknown")
+        df['collision_type'] = df['collision_type'].fillna("Unknown")
+        df['police_report_available'] = df['police_report_available'].fillna("Unknown")
         return df
 
     df = load_data()
+    st.title("📊 Insurance Fraud Analysis Dashboard")
 
-    # Dashboard Title
-    st.title("📊 Insurance Fraud Detection Dashboard")
-    st.markdown("**Visualizing patterns in insurance claims to detect potential frauds.**")
+    # ========== BAR CHART ==========
+    st.markdown("### 🔷 Filter for Bar Chart")
+    bar_col1, bar_col2 = st.columns(2)
+    with bar_col1:
+        x_bar = st.selectbox("Bar Chart X-axis (Categorical)", df.select_dtypes(include='object').columns, key="bar_x")
+    with bar_col2:
+        y_bar = st.selectbox("Bar Chart Y-axis (Numerical)", df.select_dtypes(include='number').columns, key="bar_y")
 
-    # Layout: 2 columns
+    bar_data = df.groupby(x_bar)[y_bar].mean().reset_index()
+    bar_colors = px.colors.sequential.Blues + px.colors.sequential.PuBuGn[::-1]  # Mixed blue palette
+
+    fig_bar = px.bar(bar_data, x=x_bar, y=y_bar, text_auto='.2s', title=f"Avg {y_bar} by {x_bar}")
+    fig_bar.update_traces(marker=dict(line=dict(color='black', width=1), color=bar_data[y_bar], colorscale='Blues'))
+    fig_bar.update_layout(template="plotly_white", plot_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+    # ========== LINE CHART ==========
+    st.markdown("### 🔷 Filter for Line Chart")
+    line_col1, line_col2 = st.columns(2)
+    with line_col1:
+        x_line = st.selectbox("Line Chart X-axis (Categorical)", df.select_dtypes(include='object').columns, key="line_x")
+    with line_col2:
+        y_line = st.selectbox("Line Chart Y-axis (Numerical)", df.select_dtypes(include='number').columns, key="line_y")
+
+    line_data = df.groupby(x_line)[y_line].mean().reset_index()
+    fig_line = px.line(line_data, x=x_line, y=y_line, title=f"Trend of {y_line} over {x_line}",
+                    markers=True, line_shape="spline", color_discrete_sequence=["#002060"])
+    fig_line.update_traces(line=dict(width=3))
+    fig_line.update_layout(template="plotly_white")
+    st.plotly_chart(fig_line, use_container_width=True)
+
+    # ========== PIE & DONUT ==========
     col1, col2 = st.columns(2)
 
-    # ================== Chart 1: Fraud Count ===================
     with col1:
-        st.subheader("🔍 Fraud vs Non-Fraud Count")
-        fig, ax = plt.subplots()
-        colors = ['#1E3A8A', '#3B82F6']
-        sns.countplot(x='fraud_reported', data=df, palette=colors, ax=ax)
-        ax.set_xticklabels(['Non-Fraud', 'Fraud'])
-        ax.set_ylabel("Count")
-        st.pyplot(fig)
+        st.markdown("#### 🍩 Donut Chart - Fraud Reported")
+        fig_donut = px.pie(df, names='fraud_reported', hole=0.5, title="Fraud vs Non-Fraud",
+                        color_discrete_sequence=px.colors.sequential.PuBu[::-1])
+        fig_donut.update_traces(textposition='inside', textinfo='percent+label')
+        st.plotly_chart(fig_donut, use_container_width=True)
 
-    # ================== Chart 2: Claim Amount by Fraud ===================
     with col2:
-        st.subheader("💰 Total Claim Amount Distribution")
-        fig, ax = plt.subplots()
-        sns.boxplot(x='fraud_reported', y='total_claim_amount', data=df, palette=colors, ax=ax)
-        ax.set_xticklabels(['Non-Fraud', 'Fraud'])
-        ax.set_ylabel("Claim Amount")
-        st.pyplot(fig)
-
-    # ================== Chart 3: Education vs Fraud ===================
-    st.subheader("🎓 Education Level vs Fraud Rate")
-    fraud_by_edu = df.groupby('insured_education_level')['fraud_reported'].mean().sort_values()
-    fig, ax = plt.subplots(figsize=(8, 3))
-    fraud_by_edu.plot(kind='barh', color='#1D4ED8', ax=ax)
-    ax.set_xlabel("Fraud Rate")
-    st.pyplot(fig)
-
-    # ================== Chart 4: Correlation Heatmap ===================
-    st.subheader("🚗 Top 10 Categories by Avg Total Claim Amount")
-
-    # Use a valid categorical column other than 'auto_make'
-    categorical_cols = df.select_dtypes(include='object').columns.tolist()
-    fallback_col = None
-    for col in categorical_cols:
-        if df[col].nunique() < 50 and col != 'fraud_reported':
-            fallback_col = col
-            break
-
-    if fallback_col:
-        top_vals = df.groupby(fallback_col)['total_claim_amount'].mean().sort_values(ascending=False).head(10)
-        fig, ax = plt.subplots(figsize=(8, 3))
-        top_vals.plot(kind='bar', color='#3B82F6', ax=ax)
-        ax.set_ylabel("Avg Claim Amount")
-        ax.set_xlabel(fallback_col.replace("_", " ").title())
-        st.pyplot(fig)
-    else:
-        st.warning("No suitable categorical column found for top claims chart.")
-
-    # ================== Chart 6: Gender vs Fraud (Fallback Safe) ===================
-    st.subheader("👤 Demographic-wise Fraud Reported")
-
-    if 'insured_sex' in df.columns:
-        fig, ax = plt.subplots()
-        sns.countplot(data=df, x='insured_sex', hue='fraud_reported', palette=colors, ax=ax)
-        ax.legend(['Non-Fraud', 'Fraud'])
-        st.pyplot(fig)
-    else:
-        st.warning("`insured_sex` column not found in dataset.")
+        st.markdown("#### 🥧 Pie Chart - Incident Type")
+        fig_pie = px.pie(df, names='incident_type', title="Incident Type Distribution",
+                        color_discrete_sequence=px.colors.sequential.Blues_r)
+        fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+        st.plotly_chart(fig_pie, use_container_width=True)
 
 # =============== PREDICTION ==================
 elif section == "ML Prediction":
