@@ -261,14 +261,14 @@ if section == "Visualization":
     st.subheader("📄 Download & View Insurance Fraud Detection Dashboard")
 
     # Path to the PDF file in your app directory or GitHub repo if deploying
-    pdf_file_path = r"insurance_policy.pdf"
+    pdf_file_path = r"fraud_dashboard.pdf"
 
     # Show Download Button
     with open(pdf_file_path, "rb") as f:
         st.download_button(
             label="⬇️ Download Dashboard Pdf",
             data=f,
-            file_name="insurance_policy.pdf",
+            file_name="fraud_dashboard.pdf",
             mime="application/pdf"
         )
 
