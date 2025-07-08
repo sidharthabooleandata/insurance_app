@@ -257,11 +257,21 @@ if section == "Visualization":
         st.plotly_chart(fig_pie, use_container_width=True)
 
     # ========== PDF Section ==========
-    st.subheader("📄 Dashboard Report")
+    st.subheader("📥 Download Power BI Dashboard (.pbix)")
     
-    # Download
-    with open("fraud_dashboard_2.pdf", "rb") as f:
-        st.download_button("⬇️ Download PDF", f, "fraud_dashboard.pdf", "application/pdf")
+    pbix_path = "fraud.pbix"
+    
+    # Check if file exists
+    if os.path.exists(pbix_path):
+        with open(pbix_path, "rb") as f:
+            st.download_button(
+                label="⬇️ Download .pbix File",
+                data=f,
+                file_name="fraud.pbix",
+                mime="application/octet-stream"
+            )
+    else:
+        st.warning("⚠️ Power BI .pbix file not found. Please ensure it is in your project folder.")
     
     
 
