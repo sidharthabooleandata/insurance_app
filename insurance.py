@@ -258,7 +258,7 @@ if section == "Visualization":
         st.plotly_chart(fig_pie, use_container_width=True)
 
     # ========== PDF Section ==========
-    st.subheader("📥 Insurance Fraud Detection Dashboard (.pbix)")
+    st.subheader("📥 Insurance Fraud Detection Dashboard ")
     
     pbix_path = "fraud.pbix"
     
