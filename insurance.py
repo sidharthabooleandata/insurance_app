@@ -257,6 +257,16 @@ if section == "Visualization":
         st.plotly_chart(fig_pie, use_container_width=True)
 
     # ========== PDF Section ==========
+    st.subheader("📄 Dashboard Report")
+    
+    # Download
+    with open("fraud_dashboard.pdf", "rb") as f:
+        st.download_button("⬇️ Download PDF", f, "fraud_dashboard.pdf", "application/pdf")
+    
+    # View
+    st.markdown(f"""
+        <iframe src="fraud_dashboard.pdf" width="100%" height="600px"></iframe>
+    """, unsafe_allow_html=True)
 
 
 
