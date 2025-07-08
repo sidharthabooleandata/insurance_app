@@ -237,20 +237,7 @@ if section == "Visualization":
     fig_bar.update_layout(template="plotly_white", plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # ========== LINE CHART ==========
-    st.markdown("### 🔷 Filter for Line Chart")
-    line_col1, line_col2 = st.columns(2)
-    with line_col1:
-        x_line = st.selectbox("Line Chart X-axis (Categorical)", df.select_dtypes(include='object').columns, key="line_x")
-    with line_col2:
-        y_line = st.selectbox("Line Chart Y-axis (Numerical)", df.select_dtypes(include='number').columns, key="line_y")
-
-    line_data = df.groupby(x_line)[y_line].mean().reset_index()
-    fig_line = px.line(line_data, x=x_line, y=y_line, title=f"Trend of {y_line} over {x_line}",
-                    markers=True, line_shape="spline", color_discrete_sequence=["#002060"])
-    fig_line.update_traces(line=dict(width=3))
-    fig_line.update_layout(template="plotly_white")
-    st.plotly_chart(fig_line, use_container_width=True)
+    
 
     # ========== PIE & DONUT ==========
     col1, col2 = st.columns(2)
@@ -269,12 +256,12 @@ if section == "Visualization":
         fig_pie.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig_pie, use_container_width=True)
 
- # ========== PDF Section ==========
+    # ========== PDF Section ==========
     st.markdown("---")
     st.subheader("📄 Download & View Insurance Fraud Detection Dashboard")
 
     # Path to the PDF file in your app directory or GitHub repo if deploying
-    pdf_file_path = r"Fraud_dashboard.pdf"
+    pdf_file_path = r"insurance_policy.pdf"
 
     # Show Download Button
     with open(pdf_file_path, "rb") as f:
@@ -291,53 +278,26 @@ if section == "Visualization":
     """, unsafe_allow_html=True)
 
 
+
 # =============== PREDICTION ==================
 elif section == "ML Prediction":
     st.title("🔍 Insurance Fraud Detection")
     st.markdown("Fill the form to predict claim status:")
 
     user_input = {}
-    use_test_case = st.checkbox("💡 Use Suspicious Example")
 
     with st.form("prediction_form"):
         for col in X.columns:
             if col in label_encoders:
                 options = label_encoders[col].classes_
                 default_val = options[0]
-                if use_test_case:
-                    fraud_case = {
-                        "incident_type": "Collision",
-                        "collision_type": "Rear Collision",
-                        "incident_severity": "Major Damage",
-                        "authorities_contacted": "None",
-                        "insured_education_level": "High School",
-                        "insured_occupation": "laborer",
-                        "insured_relationship": "own-child",
-                        "insured_sex": "MALE",
-                        "auto_make": "Dodge",
-                        "police_report_available": "NO"
-                    }
-                    default_val = fraud_case.get(col, options[0])
 
                 user_input[col] = st.selectbox(f"{col}", options, index=options.tolist().index(default_val) if default_val in options else 0)
-
             else:
                 min_val = float(df[col].min())
                 max_val = float(df[col].max())
                 mean_val = float(df[col].mean())
                 default_val = mean_val
-                if use_test_case:
-                    fraud_nums = {
-                        "incident_hour_of_the_day": 3,
-                        "number_of_vehicles_involved": 3,
-                        "witnesses": 0,
-                        "total_claim_amount": 45000,
-                        "injury_claim": 17000,
-                        "property_claim": 10000,
-                        "vehicle_claim": 8000,
-                        "bodily_injuries": 2
-                    }
-                    default_val = fraud_nums.get(col, mean_val)
 
                 user_input[col] = st.number_input(f"{col}", min_val, max_val, default_val)
 
@@ -355,19 +315,19 @@ elif section == "ML Prediction":
         st.markdown("---")
         if prediction == 1:
             st.markdown(f"""
-                <div style="background-color:#FFCDD2; padding: 20px; border-radius: 10px; border: 2px solid red;">
-                    <h3 class="fraud-text">⚠️ FRAUDULENT CLAIM DETECTED</h3>
-                    <p style="all: unset; color: black; font-size: 18px; font-weight: bold;">
-                        🔍 Fraud Probability: <strong style="all: unset; color: black;">{probability:.2%}</strong>
+                <div style="background-color:#FFEBEE; padding: 20px; border-radius: 10px; border: 2px solid #b71c1c;">
+                    <h3 style="color: #b71c1c;">⚠️ FRAUDULENT CLAIM DETECTED</h3>
+                    <p style="font-size: 18px; font-weight: bold; color: #b71c1c;">
+                        🔍 Fraud Probability: <strong>{probability:.2%}</strong>
                     </p>
                 </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
-                <div style="background-color:#C8E6C9; padding: 20px; border-radius: 10px; border: 2px solid green;">
-                    <h3 class="nonfraud-text">✅ CLAIM IS NON-FRAUDULENT</h3>
-                    <p style="all: unset; color: black; font-size: 18px; font-weight: bold;">
-                        🔍 Confidence: <strong style="all: unset; color: black;">{(1 - probability):.2%}</strong>
+                <div style="background-color:#E8F5E9; padding: 20px; border-radius: 10px; border: 2px solid #1b5e20;">
+                    <h3 style="color: #1b5e20;">✅ CLAIM IS NON-FRAUDULENT</h3>
+                    <p style="font-size: 18px; font-weight: bold; color: #1b5e20;">
+                        🔍 Confidence: <strong>{(1 - probability):.2%}</strong>
                     </p>
                 </div>
             """, unsafe_allow_html=True)
