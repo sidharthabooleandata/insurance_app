@@ -257,25 +257,6 @@ if section == "Visualization":
         st.plotly_chart(fig_pie, use_container_width=True)
 
     # ========== PDF Section ==========
-    st.markdown("---")
-    st.subheader("📄 Download & View Insurance Fraud Detection Dashboard")
-
-    # Path to the PDF file in your app directory or GitHub repo if deploying
-    pdf_file_path = r"fraud_dashboard.pdf"
-
-    # Show Download Button
-    with open(pdf_file_path, "rb") as f:
-        st.download_button(
-            label="⬇️ Download Dashboard Pdf",
-            data=f,
-            file_name="insurance_policy.pdf",
-            mime="application/pdf"
-        )
-
-    # Embed PDF Viewer (optional, only works if local or deployed in GitHub)
-    st.markdown(f"""
-        <iframe src="{pdf_file_path}" width="100%" height="600px" type="application/pdf"></iframe>
-    """, unsafe_allow_html=True)
 
 
 
