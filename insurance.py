@@ -260,7 +260,7 @@ if section == "Visualization":
     st.subheader("📄 Dashboard Report")
     
     # Download
-    with open("fraud_dashboard.pdf", "rb") as f:
+    with open("fraud_dashboard_2.pdf", "rb") as f:
         st.download_button("⬇️ Download PDF", f, "fraud_dashboard.pdf", "application/pdf")
     
     
